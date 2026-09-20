@@ -89,3 +89,6 @@ export async function apiRestoreItem(resourceType: string, resourceId: string) {
 export async function apiPermanentDelete(resourceType: string, resourceId: string) {
   return apiDelete(`/api/trash/${resourceType}/${resourceId}`);
 }
+export async function apiGetSharedWithMe() {
+  return apiGet('/api/shared-with-me');
+}

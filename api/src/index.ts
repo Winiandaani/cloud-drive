@@ -10,11 +10,13 @@ import publicLinkRouter from './routes/publicLink';
 import searchRouter from './routes/search';
 import starsRouter from './routes/stars';
 import trashRouter from './routes/trash';
+import sharedWithMeRouter from './routes/sharedWithMe';
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 app.use('/api/search', searchRouter);
+app.use('/api/shared-with-me', sharedWithMeRouter);
 app.use('/api/stars', starsRouter);
 app.use('/api/trash', trashRouter);
 

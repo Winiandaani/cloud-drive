@@ -4,7 +4,8 @@ import { useEffect, useRef, useState } from 'react';
 import { useSession } from '@/hooks/useSession';
 import Sidebar from '@/components/Sidebar';
 import ShareDialog from '@/components/ShareDialog';
-import { apiGet, apiPost, apiUploadFile, apiDelete, apiSearch, apiToggleStar, apiGetStarred, apiGetTrash, apiRestoreItem, apiPermanentDelete } from '@/lib/api';
+import { apiGet, apiPost, apiUploadFile, apiDelete, apiSearch, apiToggleStar, apiGetStarred, apiGetTrash, apiRestoreItem, apiPermanentDelete, apiGetSharedWithMe } from '@/lib/api';
+
 interface Folder {
   id: string;
   name: string;
@@ -35,7 +36,9 @@ export default function HomePage() {
   const [starredFiles, setStarredFiles] = useState<FileItem[]>([]);
     const [starredIds, setStarredIds] = useState<Set<string>>(new Set());
   const [trashFolders, setTrashFolders] = useState<Folder[]>([]);
-  const [trashFiles, setTrashFiles] = useState<FileItem[]>([]);
+    const [trashFiles, setTrashFiles] = useState<FileItem[]>([]);
+  const [sharedFolders, setSharedFolders] = useState<Folder[]>([]);
+  const [sharedFiles, setSharedFiles] = useState<FileItem[]>([]);
 
   useEffect(() => {
     if (!user) return;
@@ -58,7 +61,7 @@ export default function HomePage() {
       .catch((err) => console.error('Failed to load starred items:', err));
   }, [user]);
 
-    useEffect(() => {
+     useEffect(() => {
     if (activeView !== 'trash') return;
 
     apiGetTrash()
@@ -69,6 +72,16 @@ export default function HomePage() {
       .catch((err) => console.error('Failed to load trash:', err));
   }, [activeView]);
 
+  useEffect(() => {
+    if (activeView !== 'shared') return;
+
+    apiGetSharedWithMe()
+      .then((data) => {
+        setSharedFolders(data.folders);
+        setSharedFiles(data.files);
+      })
+      .catch((err) => console.error('Failed to load shared items:', err));
+  }, [activeView]);
   useEffect(() => {
     if (!searchQuery.trim()) {
       setSearchResults(null);
@@ -233,9 +246,10 @@ export default function HomePage() {
     return null;
   }
 
-     const isSearching = searchQuery.trim().length > 0;
+      const isSearching = searchQuery.trim().length > 0;
   const isStarredView = activeView === 'starred' && !isSearching;
   const isTrashView = activeView === 'trash' && !isSearching;
+  const isSharedView = activeView === 'shared' && !isSearching;
 
   const displayFolders = isSearching
     ? searchResults?.folders ?? []
@@ -243,6 +257,8 @@ export default function HomePage() {
     ? trashFolders
     : isStarredView
     ? starredFolders
+    : isSharedView
+    ? sharedFolders
     : folders;
 
   const displayFiles = isSearching
@@ -251,6 +267,8 @@ export default function HomePage() {
     ? trashFiles
     : isStarredView
     ? starredFiles
+    : isSharedView
+    ? sharedFiles
     : files;
 
   return (
@@ -300,7 +318,13 @@ export default function HomePage() {
           ) : displayFolders.length === 0 && displayFiles.length === 0 ? (
             <div className="flex h-full flex-col items-center justify-center text-slate-400">
               <p className="text-sm">
-                {isStarredView ? 'No starred items yet' : 'No files yet - upload something to get started'}
+                {isTrashView
+                  ? 'Trash is empty'
+                  : isStarredView
+                  ? 'No starred items yet'
+                  : isSharedView
+                  ? 'Nothing has been shared with you yet'
+                  : 'No files yet - upload something to get started'}
               </p>
             </div>
           ) : (
@@ -310,8 +334,8 @@ export default function HomePage() {
                   key={folder.id}
                   className="group relative flex cursor-pointer flex-col items-center gap-2 rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
                 >
-                                    <div className="absolute right-2 top-2 flex gap-1">
-                    {isTrashView ? (
+                                                      <div className="absolute right-2 top-2 flex gap-1">
+                    {isSharedView ? null : isTrashView ? (
                       <>
                         <button
                           onClick={(e) => handleRestore(e, 'folder', folder.id)}
@@ -359,8 +383,8 @@ export default function HomePage() {
                   onClick={() => !isTrashView && handleFileClick(file)}
                   className="group relative flex cursor-pointer flex-col items-center gap-2 rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
                 >
-                                  <div className="absolute right-2 top-2 flex gap-1">
-                    {isTrashView ? (
+                                                <div className="absolute right-2 top-2 flex gap-1">
+                    {isSharedView ? null : isTrashView ? (    
                       <>
                         <button
                           onClick={(e) => handleRestore(e, 'file', file.id)}
