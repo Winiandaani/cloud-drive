@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useSession } from '@/hooks/useSession';
 import Sidebar from '@/components/Sidebar';
 import ShareDialog from '@/components/ShareDialog';
-import { apiGet, apiPost, apiUploadFile, apiDelete, apiSearch, apiToggleStar, apiGetStarred, apiGetTrash, apiRestoreItem, apiPermanentDelete, apiGetSharedWithMe } from '@/lib/api';
+import { apiGet, apiPost, apiUploadFile, apiDelete, apiSearch, apiToggleStar, apiGetStarred, apiGetTrash, apiRestoreItem, apiPermanentDelete, apiGetSharedWithMe, apiGetRecent } from '@/lib/api';
 
 interface Folder {
   id: string;
@@ -17,6 +17,8 @@ interface FileItem {
   name: string;
   mime_type: string;
   size_bytes: number;
+  created_at?: string;
+  last_accessed_at?: string | null;
 }
 
 export default function HomePage() {
@@ -39,6 +41,7 @@ export default function HomePage() {
     const [trashFiles, setTrashFiles] = useState<FileItem[]>([]);
   const [sharedFolders, setSharedFolders] = useState<Folder[]>([]);
   const [sharedFiles, setSharedFiles] = useState<FileItem[]>([]);
+  const [recentFiles, setRecentFiles] = useState<FileItem[]>([]);
 
   useEffect(() => {
     if (!user) return;
@@ -72,7 +75,7 @@ export default function HomePage() {
       .catch((err) => console.error('Failed to load trash:', err));
   }, [activeView]);
 
-  useEffect(() => {
+     useEffect(() => {
     if (activeView !== 'shared') return;
 
     apiGetSharedWithMe()
@@ -81,6 +84,14 @@ export default function HomePage() {
         setSharedFiles(data.files);
       })
       .catch((err) => console.error('Failed to load shared items:', err));
+  }, [activeView]);
+
+  useEffect(() => {
+    if (activeView !== 'recent') return;
+
+    apiGetRecent()
+      .then((data) => setRecentFiles(data.files))
+      .catch((err) => console.error('Failed to load recent files:', err));
   }, [activeView]);
   useEffect(() => {
     if (!searchQuery.trim()) {
@@ -246,13 +257,14 @@ export default function HomePage() {
     return null;
   }
 
-      const isSearching = searchQuery.trim().length > 0;
+       const isSearching = searchQuery.trim().length > 0;
   const isStarredView = activeView === 'starred' && !isSearching;
   const isTrashView = activeView === 'trash' && !isSearching;
   const isSharedView = activeView === 'shared' && !isSearching;
+  const isRecentView = activeView === 'recent' && !isSearching;
 
-  const displayFolders = isSearching
-    ? searchResults?.folders ?? []
+  const displayFolders = isSearching || isRecentView
+    ? []
     : isTrashView
     ? trashFolders
     : isStarredView
@@ -263,6 +275,8 @@ export default function HomePage() {
 
   const displayFiles = isSearching
     ? searchResults?.files ?? []
+    : isRecentView
+    ? recentFiles
     : isTrashView
     ? trashFiles
     : isStarredView
@@ -430,6 +444,13 @@ export default function HomePage() {
                   <span className="w-full truncate text-center text-sm font-medium text-slate-700">
                     {file.name}
                   </span>
+                  {isRecentView && (
+                    <span className="text-xs text-slate-400">
+                      {file.last_accessed_at
+                        ? `Opened ${new Date(file.last_accessed_at).toLocaleDateString()}`
+                        : `Uploaded ${new Date(file.created_at!).toLocaleDateString()}`}
+                    </span>
+                  )}
                 </div>
               ))}
             </div>

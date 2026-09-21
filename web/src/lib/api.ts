@@ -92,3 +92,6 @@ export async function apiPermanentDelete(resourceType: string, resourceId: strin
 export async function apiGetSharedWithMe() {
   return apiGet('/api/shared-with-me');
 }
+export async function apiGetRecent() {
+  return apiGet('/api/recent');
+}

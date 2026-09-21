@@ -52,7 +52,6 @@ router.post('/upload', requireAuth, upload.single('file'), async (req: AuthedReq
   }
 });
 
-// GET /api/files/:id — get file metadata + signed download URL
 router.get('/:id', requireAuth, async (req: AuthedRequest, res) => {
   const { id } = req.params;
 
@@ -67,6 +66,10 @@ router.get('/:id', requireAuth, async (req: AuthedRequest, res) => {
     return res.status(404).json({ error: { code: 'NOT_FOUND', message: 'File not found' } });
   }
 
+  await supabaseAdmin
+    .from('files')
+    .update({ last_accessed_at: new Date().toISOString() })
+    .eq('id', id);
   const { data: signedUrlData } = await supabaseAdmin.storage
     .from('drive')
     .createSignedUrl(file.storage_key, 60);
