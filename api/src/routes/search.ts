@@ -12,27 +12,65 @@ router.get('/', requireAuth, async (req: AuthedRequest, res) => {
     return res.json({ folders: [], files: [] });
   }
 
-  const { data: folders, error: foldersError } = await supabaseAdmin
+  // Get IDs of resources shared with this user
+  const { data: shareRows, error: sharesError } = await supabaseAdmin
+    .from('shares')
+    .select('resource_type, resource_id')
+    .eq('grantee_user_id', req.userId);
+
+  if (sharesError) {
+    return res.status(500).json({ error: { code: 'DB_ERROR', message: sharesError.message } });
+  }
+
+  const sharedFolderIds = shareRows.filter((s) => s.resource_type === 'folder').map((s) => s.resource_id);
+  const sharedFileIds = shareRows.filter((s) => s.resource_type === 'file').map((s) => s.resource_id);
+
+  // Search own folders
+  const { data: ownFolders, error: ownFoldersError } = await supabaseAdmin
     .from('folders')
     .select('*')
     .eq('owner_id', req.userId)
     .eq('is_deleted', false)
     .ilike('name', `%${q}%`);
 
-  if (foldersError) {
-    return res.status(500).json({ error: { code: 'DB_ERROR', message: foldersError.message } });
+  if (ownFoldersError) {
+    return res.status(500).json({ error: { code: 'DB_ERROR', message: ownFoldersError.message } });
   }
 
-  const { data: files, error: filesError } = await supabaseAdmin
+  // Search shared folders
+  const { data: sharedFoldersFound } = sharedFolderIds.length
+    ? await supabaseAdmin
+        .from('folders')
+        .select('*')
+        .in('id', sharedFolderIds)
+        .eq('is_deleted', false)
+        .ilike('name', `%${q}%`)
+    : { data: [] };
+
+  // Search own files
+  const { data: ownFiles, error: ownFilesError } = await supabaseAdmin
     .from('files')
     .select('*')
     .eq('owner_id', req.userId)
     .eq('is_deleted', false)
     .ilike('name', `%${q}%`);
 
-  if (filesError) {
-    return res.status(500).json({ error: { code: 'DB_ERROR', message: filesError.message } });
+  if (ownFilesError) {
+    return res.status(500).json({ error: { code: 'DB_ERROR', message: ownFilesError.message } });
   }
+
+  // Search shared files
+  const { data: sharedFilesFound } = sharedFileIds.length
+    ? await supabaseAdmin
+        .from('files')
+        .select('*')
+        .in('id', sharedFileIds)
+        .eq('is_deleted', false)
+        .ilike('name', `%${q}%`)
+    : { data: [] };
+
+  const folders = [...(ownFolders || []), ...(sharedFoldersFound || [])];
+  const files = [...(ownFiles || []), ...(sharedFilesFound || [])];
 
   res.json({ folders, files });
 });
