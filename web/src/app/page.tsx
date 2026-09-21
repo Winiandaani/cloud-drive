@@ -353,30 +353,30 @@ export default function HomePage() {
                       <>
                         <button
                           onClick={(e) => handleRestore(e, 'folder', folder.id)}
-                          className="hidden rounded-md bg-white px-2 py-1 text-xs font-medium text-green-600 shadow-sm hover:bg-green-50 group-hover:block"
+                          className="flex rounded-md bg-white px-2 py-1 text-xs font-medium text-green-600 shadow-sm hover:bg-green-50 sm:hidden sm:group-hover:flex"
                         >
                           Restore
                         </button>
                         <button
                           onClick={(e) => handlePermanentDelete(e, 'folder', folder.id)}
-                          className="hidden rounded-md bg-white px-2 py-1 text-xs font-medium text-red-600 shadow-sm hover:bg-red-50 group-hover:block"
+                          className="flex rounded-md bg-white px-2 py-1 text-xs font-medium text-red-600 shadow-sm hover:bg-red-50 sm:hidden sm:group-hover:flex"
                         >
                           Delete Forever
                         </button>
                       </>
                     ) : (
                       <>
-                        <button
-                          onClick={(e) => handleToggleStar(e, folder, 'folder')}
-                          className={`text-xl leading-none ${
-                            starredIds.has(folder.id) ? 'text-amber-500' : 'hidden text-slate-300 group-hover:block'
-                          }`}
-                        >
-                          ★
-                        </button>
+                                                  <button
+                            onClick={(e) => handleToggleStar(e, folder, 'folder')}
+                            className={`text-xl leading-none ${
+                              starredIds.has(folder.id) ? 'text-amber-500' : 'block text-slate-300 sm:hidden sm:group-hover:block'
+                            }`}
+                          >
+                            ★
+                          </button>
                         <button
                           onClick={(e) => handleDeleteFolder(e, folder.id)}
-                          className="hidden rounded-md bg-white px-2 py-1 text-xs font-medium text-red-600 shadow-sm hover:bg-red-50 group-hover:block"
+                          className="flex rounded-md bg-white px-2 py-1 text-xs font-medium text-red-600 shadow-sm hover:bg-red-50 sm:hidden sm:group-hover:flex"
                         >
                           X
                         </button>
@@ -402,36 +402,36 @@ export default function HomePage() {
                       <>
                         <button
                           onClick={(e) => handleRestore(e, 'file', file.id)}
-                          className="hidden rounded-md bg-white px-2 py-1 text-xs font-medium text-green-600 shadow-sm hover:bg-green-50 group-hover:block"
+                          className="flex rounded-md bg-white px-2 py-1 text-xs font-medium text-green-600 shadow-sm hover:bg-green-50 sm:hidden sm:group-hover:flex"
                         >
                           Restore
                         </button>
                         <button
                           onClick={(e) => handlePermanentDelete(e, 'file', file.id)}
-                          className="hidden rounded-md bg-white px-2 py-1 text-xs font-medium text-red-600 shadow-sm hover:bg-red-50 group-hover:block"
+                          className="flex rounded-md bg-white px-2 py-1 text-xs font-medium text-red-600 shadow-sm hover:bg-red-50 sm:hidden sm:group-hover:flex"
                         >
                           Delete Forever
                         </button>
                       </>
                     ) : (
                       <>
-                        <button
-                          onClick={(e) => handleToggleStar(e, file, 'file')}
-                          className={`text-xl leading-none ${
-                            starredIds.has(file.id) ? 'text-amber-500' : 'hidden text-slate-300 group-hover:block'
-                          }`}
-                        >
-                          ★
-                        </button>
+                                                  <button
+                            onClick={(e) => handleToggleStar(e, file, 'file')}
+                            className={`text-xl leading-none ${
+                              starredIds.has(file.id) ? 'text-amber-500' : 'block text-slate-300 sm:hidden sm:group-hover:block'
+                            }`}
+                          >
+                            ★
+                          </button>
                         <button
                           onClick={(e) => handleShareClick(e, file)}
-                          className="hidden rounded-md bg-white px-2 py-1 text-xs font-medium text-indigo-600 shadow-sm hover:bg-indigo-50 group-hover:block"
+                          className="flex rounded-md bg-white px-2 py-1 text-xs font-medium text-indigo-600 shadow-sm hover:bg-indigo-50 sm:hidden sm:group-hover:flex"
                         >
                           Share
                         </button>
                         <button
                           onClick={(e) => handleDeleteFile(e, file.id)}
-                          className="hidden rounded-md bg-white px-2 py-1 text-xs font-medium text-red-600 shadow-sm hover:bg-red-50 group-hover:block"
+                          className="flex rounded-md bg-white px-2 py-1 text-xs font-medium text-red-600 shadow-sm hover:bg-red-50 sm:hidden sm:group-hover:flex"
                         >
                           X
                         </button>
