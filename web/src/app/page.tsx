@@ -153,7 +153,8 @@ export default function HomePage() {
 
     setUploading(true);
     try {
-      const data = await apiUploadFile(file, null);
+      const folderId = currentFolderId === 'root' ? null : currentFolderId;
+      const data = await apiUploadFile(file, folderId);
       setFiles((prev) => [...prev, data.file]);
     } catch (err) {
       console.error('Upload failed:', err);
