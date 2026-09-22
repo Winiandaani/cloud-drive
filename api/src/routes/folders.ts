@@ -31,32 +31,49 @@ router.post('/', requireAuth, async (req: AuthedRequest, res) => {
 
 // GET /api/folders/:id — get folder contents (or root if id is "root")
 router.get('/:id', requireAuth, async (req: AuthedRequest, res) => {
-  const { id } = req.params;
-  const parentId = id === 'root' ? null : id;
+  try {
+    const { id } = req.params;
+    const parentId = id === 'root' ? null : id;
 
-  const { data: folders, error: foldersError } = await supabaseAdmin
-    .from('folders')
-    .select('*')
-    .eq('owner_id', req.userId)
-    .eq('is_deleted', false)
-    .is('parent_id', parentId);
+    let foldersQuery = supabaseAdmin
+      .from('folders')
+      .select('*')
+      .eq('owner_id', req.userId)
+      .eq('is_deleted', false);
 
-  if (foldersError) {
-    return res.status(500).json({ error: { code: 'DB_ERROR', message: foldersError.message } });
+    foldersQuery = parentId === null
+      ? foldersQuery.is('parent_id', null)
+      : foldersQuery.eq('parent_id', parentId);
+
+    const { data: folders, error: foldersError } = await foldersQuery;
+
+    if (foldersError) {
+      console.error('FOLDERS FETCH ERROR:', foldersError);
+      return res.status(500).json({ error: { code: 'DB_ERROR', message: foldersError.message } });
+    }
+
+    let filesQuery = supabaseAdmin
+      .from('files')
+      .select('*')
+      .eq('owner_id', req.userId)
+      .eq('is_deleted', false);
+
+    filesQuery = parentId === null
+      ? filesQuery.is('folder_id', null)
+      : filesQuery.eq('folder_id', parentId);
+
+    const { data: files, error: filesError } = await filesQuery;
+
+    if (filesError) {
+      console.error('FILES FETCH ERROR:', filesError);
+      return res.status(500).json({ error: { code: 'DB_ERROR', message: filesError.message } });
+    }
+
+    res.json({ folders, files });
+  } catch (err) {
+    console.error('FOLDER ROUTE CRASHED:', err);
+    res.status(500).json({ error: { code: 'INTERNAL_ERROR', message: String(err) } });
   }
-
-  const { data: files, error: filesError } = await supabaseAdmin
-    .from('files')
-    .select('*')
-    .eq('owner_id', req.userId)
-    .eq('is_deleted', false)
-    .is('folder_id', parentId);
-
-  if (filesError) {
-    return res.status(500).json({ error: { code: 'DB_ERROR', message: filesError.message } });
-  }
-
-  res.json({ folders, files });
 });
 
 // PATCH /api/folders/:id — rename or move

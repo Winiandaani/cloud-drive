@@ -43,17 +43,11 @@ export default function HomePage() {
   const [sharedFiles, setSharedFiles] = useState<FileItem[]>([]);
   const [recentFiles, setRecentFiles] = useState<FileItem[]>([]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [currentFolderId, setCurrentFolderId] = useState<string>('root');
+  const [folderPath, setFolderPath] = useState<{ id: string; name: string }[]>([]);
 
   useEffect(() => {
     if (!user) return;
-
-     apiGet('/api/folders/root')
-      .then((data) => {
-        setFolders(data.folders);
-        setFiles(data.files || []);
-      })
-      .catch((err) => console.error('Failed to load items:', err))
-      .finally(() => setLoadingItems(false));
 
     apiGetStarred()
       .then((data) => {
@@ -64,6 +58,19 @@ export default function HomePage() {
       })
       .catch((err) => console.error('Failed to load starred items:', err));
   }, [user]);
+
+  useEffect(() => {
+    if (!user) return;
+
+    setLoadingItems(true);
+    apiGet(`/api/folders/${currentFolderId}`)
+      .then((data) => {
+        setFolders(data.folders);
+        setFiles(data.files || []);
+      })
+      .catch((err) => console.error('Failed to load items:', err))
+      .finally(() => setLoadingItems(false));
+  }, [user, currentFolderId]);
 
      useEffect(() => {
     if (activeView !== 'trash') return;
@@ -116,11 +123,27 @@ export default function HomePage() {
     if (!name) return;
 
     try {
-      const data = await apiPost('/api/folders', { name, parentId: null });
+      const parentId = currentFolderId === 'root' ? null : currentFolderId;
+      const data = await apiPost('/api/folders', { name, parentId });
       setFolders((prev) => [...prev, data.folder]);
     } catch (err) {
       console.error('Failed to create folder:', err);
       alert('Could not create folder.');
+    }
+  }
+
+  function handleFolderClick(folder: Folder) {
+    setFolderPath((prev) => [...prev, { id: folder.id, name: folder.name }]);
+    setCurrentFolderId(folder.id);
+  }
+
+  function handleBreadcrumbClick(index: number) {
+    if (index === -1) {
+      setFolderPath([]);
+      setCurrentFolderId('root');
+    } else {
+      setFolderPath((prev) => prev.slice(0, index + 1));
+      setCurrentFolderId(folderPath[index].id);
     }
   }
 
@@ -295,6 +318,29 @@ export default function HomePage() {
       onMobileClose={() => setSidebarOpen(false)}
     />
       <div className="flex flex-1 flex-col">
+      {activeView === 'drive' && !isSearching && (
+        <div className="flex items-center gap-1 border-b border-slate-100 bg-white px-4 py-2 text-sm text-slate-500 sm:px-8">
+          <button
+            onClick={() => handleBreadcrumbClick(-1)}
+            className={`hover:text-indigo-600 ${folderPath.length === 0 ? 'font-medium text-slate-900' : ''}`}
+          >
+            My Drive
+          </button>
+          {folderPath.map((crumb, index) => (
+            <span key={crumb.id} className="flex items-center gap-1">
+              <span className="text-slate-300">/</span>
+              <button
+                onClick={() => handleBreadcrumbClick(index)}
+                className={`hover:text-indigo-600 ${
+                  index === folderPath.length - 1 ? 'font-medium text-slate-900' : ''
+                }`}
+              >
+                {crumb.name}
+              </button>
+            </span>
+          ))}
+        </div>
+      )}
       <div className="flex flex-col gap-3 border-b border-slate-200 bg-white px-4 py-3 sm:flex-row sm:items-center sm:gap-4 sm:px-8 sm:py-4">
           <div className="flex flex-wrap items-center gap-2 sm:gap-3">
             <button
@@ -358,6 +404,7 @@ export default function HomePage() {
                                          {displayFolders.map((folder) => (
                 <div
                   key={folder.id}
+                  onClick={() => !isTrashView && !isSharedView && !isStarredView && handleFolderClick(folder)}
                   className="group relative flex cursor-pointer flex-col items-center gap-2 rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
                 >
                                                       <div className="absolute right-2 top-2 flex gap-1">
