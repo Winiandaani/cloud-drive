@@ -46,6 +46,7 @@ export default function HomePage() {
   const [sharedFiles, setSharedFiles] = useState<FileItem[]>([]);
   const [recentFiles, setRecentFiles] = useState<FileItem[]>([]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [currentFolderId, setCurrentFolderId] = useState<string>('root');
   const [folderPath, setFolderPath] = useState<{ id: string; name: string }[]>([]);
 
@@ -150,6 +151,60 @@ export default function HomePage() {
     setActiveView('drive');
     setFolderPath([]);
     setCurrentFolderId('root');
+  }
+    function toggleSelect(e: React.MouseEvent, id: string) {
+    e.stopPropagation();
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  function clearSelection() {
+    setSelectedIds(new Set());
+  }
+    async function handleBulkDelete() {
+    if (!confirm(`Delete ${selectedIds.size} item(s)?`)) return;
+
+    const idsArray = Array.from(selectedIds);
+
+    for (const id of idsArray) {
+      const isFolder = folders.some((f) => f.id === id);
+      try {
+        if (isFolder) {
+          await apiDelete(`/api/folders/${id}`);
+          setFolders((prev) => prev.filter((f) => f.id !== id));
+        } else {
+          await apiDelete(`/api/files/${id}`);
+          setFiles((prev) => prev.filter((f) => f.id !== id));
+        }
+      } catch (err) {
+        console.error(`Failed to delete ${id}:`, err);
+      }
+    }
+
+    clearSelection();
+  }
+
+  async function handleBulkStar() {
+    const idsArray = Array.from(selectedIds);
+
+    for (const id of idsArray) {
+      const isFolder = folders.some((f) => f.id === id);
+      const item = isFolder ? folders.find((f) => f.id === id) : files.find((f) => f.id === id);
+      if (!item) continue;
+
+      try {
+        await apiToggleStar(isFolder ? 'folder' : 'file', id, true);
+        setStarredIds((prev) => new Set(prev).add(id));
+      } catch (err) {
+        console.error(`Failed to star ${id}:`, err);
+      }
+    }
+
+    clearSelection();
   }
 
   function handleBreadcrumbClick(index: number) {
@@ -422,8 +477,21 @@ export default function HomePage() {
                 <div
                   key={folder.id}
                   onClick={() => !isTrashView && !isSharedView && !isStarredView && handleFolderClick(folder)}
-                  className="group relative flex cursor-pointer flex-col items-center gap-2 rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
+                  className={`group relative flex cursor-pointer flex-col items-center gap-2 rounded-xl border p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md ${
+                    selectedIds.has(folder.id) ? 'border-indigo-400 bg-indigo-50' : 'border-slate-200 bg-white'
+                  }`}
                 >
+                  {activeView === 'drive' && !isSearching && (
+                    <input
+                      type="checkbox"
+                      checked={selectedIds.has(folder.id)}
+                      onClick={(e) => toggleSelect(e, folder.id)}
+                      onChange={() => {}}
+                      className={`absolute left-2 top-2 h-4 w-4 accent-indigo-600 ${
+                        selectedIds.has(folder.id) ? 'block' : 'hidden group-hover:block'
+                      }`}
+                    />
+                  )}
                                                       <div className="absolute right-2 top-2 flex gap-1">
                     {isSharedView ? null : isTrashView ? (
                       <>
@@ -471,8 +539,21 @@ export default function HomePage() {
                 <div
                   key={file.id}
                   onClick={() => !isTrashView && handleFileClick(file)}
-                  className="group relative flex cursor-pointer flex-col items-center gap-2 rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
+                  className={`group relative flex cursor-pointer flex-col items-center gap-2 rounded-xl border p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md ${
+                    selectedIds.has(file.id) ? 'border-indigo-400 bg-indigo-50' : 'border-slate-200 bg-white'
+                  }`}
                 >
+                  {activeView === 'drive' && !isSearching && (
+                    <input
+                      type="checkbox"
+                      checked={selectedIds.has(file.id)}
+                      onClick={(e) => toggleSelect(e, file.id)}
+                      onChange={() => {}}
+                      className={`absolute left-2 top-2 h-4 w-4 accent-indigo-600 ${
+                        selectedIds.has(file.id) ? 'block' : 'hidden group-hover:block'
+                      }`}
+                    />
+                  )}
                                                 <div className="absolute right-2 top-2 flex gap-1">
                     {isSharedView ? null : isTrashView ? (    
                       <>
@@ -561,6 +642,32 @@ export default function HomePage() {
           resourceName={sharingFile.name}
           onClose={() => setSharingFile(null)}
         />
+      )}
+      {selectedIds.size > 0 && (
+        <div className="fixed bottom-6 left-1/2 z-50 flex -translate-x-1/2 items-center gap-3 rounded-full border border-slate-200 bg-white px-5 py-3 shadow-xl">
+          <span className="text-sm font-medium text-slate-700">
+            {selectedIds.size} selected
+          </span>
+          <div className="h-4 w-px bg-slate-200" />
+          <button
+            onClick={handleBulkStar}
+            className="rounded-full px-3 py-1.5 text-sm font-medium text-amber-600 hover:bg-amber-50"
+          >
+            Star
+          </button>
+          <button
+            onClick={handleBulkDelete}
+            className="rounded-full px-3 py-1.5 text-sm font-medium text-red-600 hover:bg-red-50"
+          >
+            Delete
+          </button>
+          <button
+            onClick={clearSelection}
+            className="rounded-full px-3 py-1.5 text-sm font-medium text-slate-500 hover:bg-slate-100"
+          >
+            Cancel
+          </button>
+        </div>
       )}
     </div>
   );
