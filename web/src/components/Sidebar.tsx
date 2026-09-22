@@ -8,6 +8,7 @@ interface SidebarProps {
   onViewChange: (view: string) => void;
   mobileOpen: boolean;
   onMobileClose: () => void;
+  onGoToDrive: () => void;
 }
 
 const navItems = [
@@ -18,7 +19,7 @@ const navItems = [
   { label: 'Trash', key: 'trash' },
 ];
 
-export default function Sidebar({ activeView, onViewChange, mobileOpen, onMobileClose }: SidebarProps) {
+export default function Sidebar({ activeView, onViewChange, mobileOpen, onMobileClose, onGoToDrive }: SidebarProps) {
   const router = useRouter();
 
   async function handleLogout() {
@@ -27,7 +28,11 @@ export default function Sidebar({ activeView, onViewChange, mobileOpen, onMobile
   }
 
   function handleNavClick(key: string) {
-    onViewChange(key);
+    if (key === 'drive') {
+      onGoToDrive();
+    } else {
+      onViewChange(key);
+    }
     onMobileClose();
   }
 

@@ -72,7 +72,21 @@ router.get('/', requireAuth, async (req: AuthedRequest, res) => {
   const folders = [...(ownFolders || []), ...(sharedFoldersFound || [])];
   const files = [...(ownFiles || []), ...(sharedFilesFound || [])];
 
-  res.json({ folders, files });
+  // Resolve folder names for each file's location
+  const folderIds = [...new Set(files.map((f) => f.folder_id).filter(Boolean))];
+
+  const { data: locationFolders } = folderIds.length
+    ? await supabaseAdmin.from('folders').select('id, name').in('id', folderIds)
+    : { data: [] };
+
+  const folderNameMap = new Map((locationFolders || []).map((f) => [f.id, f.name]));
+
+  const filesWithLocation = files.map((f) => ({
+    ...f,
+    folder_name: f.folder_id ? folderNameMap.get(f.folder_id) || null : null,
+  }));
+
+  res.json({ folders, files: filesWithLocation });
 });
 
 export default router;

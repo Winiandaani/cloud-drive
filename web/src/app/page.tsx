@@ -5,6 +5,7 @@ import { useSession } from '@/hooks/useSession';
 import Sidebar from '@/components/Sidebar';
 import ShareDialog from '@/components/ShareDialog';
 import { apiGet, apiPost, apiUploadFile, apiDelete, apiSearch, apiToggleStar, apiGetStarred, apiGetTrash, apiRestoreItem, apiPermanentDelete, apiGetSharedWithMe, apiGetRecent } from '@/lib/api';
+import { getFileIcon } from '@/lib/fileIcons';
 
 interface Folder {
   id: string;
@@ -19,6 +20,8 @@ interface FileItem {
   size_bytes: number;
   created_at?: string;
   last_accessed_at?: string | null;
+  folder_name?: string | null;
+  folder_id?: string | null;
 }
 
 export default function HomePage() {
@@ -135,6 +138,18 @@ export default function HomePage() {
   function handleFolderClick(folder: Folder) {
     setFolderPath((prev) => [...prev, { id: folder.id, name: folder.name }]);
     setCurrentFolderId(folder.id);
+  }
+    function handleJumpToFolder(folderId: string, folderName: string) {
+    setSearchQuery('');
+    setFolderPath([{ id: folderId, name: folderName }]);
+    setCurrentFolderId(folderId);
+  }
+
+    function handleGoToDrive() {
+    setSearchQuery('');
+    setActiveView('drive');
+    setFolderPath([]);
+    setCurrentFolderId('root');
   }
 
   function handleBreadcrumbClick(index: number) {
@@ -317,6 +332,7 @@ export default function HomePage() {
       onViewChange={setActiveView}
       mobileOpen={sidebarOpen}
       onMobileClose={() => setSidebarOpen(false)}
+      onGoToDrive={handleGoToDrive}
     />
       <div className="flex flex-1 flex-col">
       {activeView === 'drive' && !isSearching && (
@@ -498,12 +514,33 @@ export default function HomePage() {
                       </>
                     )}
                   </div>
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600 font-bold">
-                    F
+                  <div
+                    className={`flex h-10 w-10 items-center justify-center rounded-lg text-xs font-bold ${
+                      getFileIcon(file.mime_type).bg
+                    } ${getFileIcon(file.mime_type).text}`}
+                  >
+                    {getFileIcon(file.mime_type).label}
                   </div>
                   <span className="w-full truncate text-center text-sm font-medium text-slate-700">
                     {file.name}
                   </span>
+                  {isSearching && (
+                    <span className="text-xs text-slate-400">
+                      {file.folder_name && file.folder_id ? (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleJumpToFolder(file.folder_id!, file.folder_name!);
+                          }}
+                          className="hover:text-indigo-600 hover:underline"
+                        >
+                          in {file.folder_name}
+                        </button>
+                      ) : (
+                        'in My Drive'
+                      )}
+                    </span>
+                  )}
                   {isRecentView && (
                     <span className="text-xs text-slate-400">
                       {file.last_accessed_at
