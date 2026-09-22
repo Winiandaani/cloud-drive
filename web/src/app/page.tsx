@@ -42,6 +42,7 @@ export default function HomePage() {
   const [sharedFolders, setSharedFolders] = useState<Folder[]>([]);
   const [sharedFiles, setSharedFiles] = useState<FileItem[]>([]);
   const [recentFiles, setRecentFiles] = useState<FileItem[]>([]);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -287,20 +288,31 @@ export default function HomePage() {
 
   return (
     <div className="flex h-screen">
-    <Sidebar activeView={activeView} onViewChange={setActiveView} />
+    <Sidebar
+      activeView={activeView}
+      onViewChange={setActiveView}
+      mobileOpen={sidebarOpen}
+      onMobileClose={() => setSidebarOpen(false)}
+    />
       <div className="flex flex-1 flex-col">
-      <div className="flex items-center gap-4 border-b border-slate-200 bg-white px-8 py-4">
-          <div className="flex gap-3">
+      <div className="flex flex-col gap-3 border-b border-slate-200 bg-white px-4 py-3 sm:flex-row sm:items-center sm:gap-4 sm:px-8 sm:py-4">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+            <button
+              onClick={() => setSidebarOpen(true)}
+              className="rounded-lg border border-slate-300 bg-white p-2 text-slate-700 shadow-sm sm:hidden"
+            >
+              ☰
+            </button>
             <button
               onClick={handleNewFolder}
-              className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-indigo-700"
+              className="rounded-lg bg-indigo-600 px-3 py-2 text-xs font-medium text-white shadow-sm transition-colors hover:bg-indigo-700 sm:px-4 sm:text-sm"
             >
               + New Folder
             </button>
             <button
               onClick={() => fileInputRef.current?.click()}
               disabled={uploading}
-              className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50 disabled:opacity-50"
+              className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50 disabled:opacity-50 sm:px-4 sm:text-sm"
             >
               {uploading ? 'Uploading...' : 'Upload'}
             </button>
@@ -317,10 +329,10 @@ export default function HomePage() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search files and folders..."
-            className="w-full max-w-xs min-w-0 flex-1 rounded-lg border border-slate-300 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full min-w-0 rounded-lg border border-slate-300 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:max-w-xs sm:flex-1"
           />
 
-                   <p className="ml-auto shrink-0 text-sm font-medium text-slate-500">{user.email}</p>
+          <p className="text-xs font-medium text-slate-500 sm:ml-auto sm:shrink-0 sm:text-sm">{user.email}</p>
         </div>
         <div className="flex-1 overflow-auto bg-slate-50/30 p-8">
           {isSearching && searching ? (
