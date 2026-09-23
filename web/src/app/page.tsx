@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useSession } from '@/hooks/useSession';
 import Sidebar from '@/components/Sidebar';
 import ShareDialog from '@/components/ShareDialog';
+import BulkShareDialog from '@/components/BulkShareDialog';
 import { apiGet, apiPost, apiUploadFile, apiDelete, apiSearch, apiToggleStar, apiGetStarred, apiGetTrash, apiRestoreItem, apiPermanentDelete, apiGetSharedWithMe, apiGetRecent } from '@/lib/api';
 import { getFileIcon } from '@/lib/fileIcons';
 
@@ -47,6 +48,7 @@ export default function HomePage() {
   const [recentFiles, setRecentFiles] = useState<FileItem[]>([]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkSharing, setBulkSharing] = useState(false);
   const [currentFolderId, setCurrentFolderId] = useState<string>('root');
   const [folderPath, setFolderPath] = useState<{ id: string; name: string }[]>([]);
 
@@ -648,6 +650,15 @@ export default function HomePage() {
           onClose={() => setSharingFile(null)}
         />
       )}
+      {bulkSharing && (
+        <BulkShareDialog
+          items={Array.from(selectedIds).map((id) => ({
+            id,
+            type: folders.some((f) => f.id === id) ? 'folder' : 'file',
+          }))}
+          onClose={() => setBulkSharing(false)}
+        />
+      )}
       {selectedIds.size > 0 && (
         <div className="fixed bottom-6 left-1/2 z-50 flex -translate-x-1/2 items-center gap-3 rounded-full border border-slate-200 bg-white px-5 py-3 shadow-xl">
           <span className="text-sm font-medium text-slate-700">
@@ -660,6 +671,12 @@ export default function HomePage() {
             Select All
           </button>
           <div className="h-4 w-px bg-slate-200" />
+          <button
+            onClick={() => setBulkSharing(true)}
+            className="rounded-full px-3 py-1.5 text-sm font-medium text-indigo-600 hover:bg-indigo-50"
+          >
+            Share
+          </button>
           <button
             onClick={handleBulkStar}
             className="rounded-full px-3 py-1.5 text-sm font-medium text-amber-600 hover:bg-amber-50"
