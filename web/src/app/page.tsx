@@ -165,6 +165,10 @@ export default function HomePage() {
   function clearSelection() {
     setSelectedIds(new Set());
   }
+    function handleSelectAll() {
+    const allIds = [...displayFolders.map((f) => f.id), ...displayFiles.map((f) => f.id)];
+    setSelectedIds(new Set(allIds));
+  }
     async function handleBulkDelete() {
     if (!confirm(`Delete ${selectedIds.size} item(s)?`)) return;
 
@@ -440,6 +444,7 @@ export default function HomePage() {
               onChange={handleFileSelected}
               className="hidden"
             />
+
           </div>
 
           <input
@@ -648,6 +653,12 @@ export default function HomePage() {
           <span className="text-sm font-medium text-slate-700">
             {selectedIds.size} selected
           </span>
+          <button
+            onClick={handleSelectAll}
+            className="rounded-full px-3 py-1.5 text-sm font-medium text-indigo-600 hover:bg-indigo-50"
+          >
+            Select All
+          </button>
           <div className="h-4 w-px bg-slate-200" />
           <button
             onClick={handleBulkStar}
