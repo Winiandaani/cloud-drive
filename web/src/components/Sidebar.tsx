@@ -2,6 +2,7 @@
 
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
+import { useTheme } from '@/hooks/useTheme';
 
 interface SidebarProps {
   activeView: string;
@@ -21,6 +22,7 @@ const navItems = [
 
 export default function Sidebar({ activeView, onViewChange, mobileOpen, onMobileClose, onGoToDrive }: SidebarProps) {
   const router = useRouter();
+  const { theme, toggleTheme } = useTheme();
 
   async function handleLogout() {
     await supabase.auth.signOut();
@@ -45,17 +47,17 @@ export default function Sidebar({ activeView, onViewChange, mobileOpen, onMobile
         />
       )}
 
+
             <aside
-        className={`fixed inset-y-0 left-0 z-50 flex h-screen w-64 flex-col border-r border-slate-200 bg-slate-50 p-5 shadow-xl transition-transform sm:relative sm:bg-slate-50/50 sm:shadow-none sm:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 flex h-screen w-64 flex-col border-r border-slate-200 bg-slate-50 p-5 shadow-xl transition-transform dark:border-slate-800/60 dark:bg-gradient-to-b dark:from-slate-900 dark:to-slate-950 sm:relative sm:bg-slate-50/50 sm:shadow-none sm:translate-x-0 ${
           mobileOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
-      >
-        <div className="mb-8 flex items-center justify-between px-2">
+      >  <div className="mb-8 flex items-center justify-between px-2">
           <div className="flex items-center gap-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-xs font-bold text-white">
               CD
             </div>
-            <h1 className="brand-title text-lg font-bold text-slate-900">Cloud Drive</h1>
+            <h1 className="brand-title text-lg font-bold text-slate-900 dark:text-white">Cloud Drive</h1>
           </div>
           <button onClick={onMobileClose} className="text-slate-400 sm:hidden">
             ✕
@@ -69,8 +71,8 @@ export default function Sidebar({ activeView, onViewChange, mobileOpen, onMobile
               onClick={() => handleNavClick(item.key)}
               className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium transition-colors ${
                 activeView === item.key
-                  ? 'bg-indigo-50 text-indigo-700'
-                  : 'text-slate-600 hover:bg-slate-100'
+                  ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-400'
+                  : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800'
               }`}
             >
               <span>{item.label}</span>
@@ -79,8 +81,15 @@ export default function Sidebar({ activeView, onViewChange, mobileOpen, onMobile
         </nav>
 
         <button
+          onClick={toggleTheme}
+          className="mt-2 flex items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
+        >
+          <span>{theme === 'dark' ? 'Light mode' : 'Dark mode'}</span>
+        </button>
+
+        <button
           onClick={handleLogout}
-          className="mt-4 flex items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium text-red-600 transition-colors hover:bg-red-50"
+          className="mt-1 flex items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium text-red-600 transition-colors hover:bg-red-50 dark:hover:bg-red-500/10"
         >
           <span>Log out</span>
         </button>

@@ -348,7 +348,7 @@ export default function HomePage() {
 
   if (loading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-slate-50">
+      <div className="flex h-screen items-center justify-center bg-slate-50 dark:bg-slate-900">
         <p className="text-slate-400">Loading...</p>
       </div>
     );
@@ -397,7 +397,7 @@ export default function HomePage() {
     />
       <div className="flex flex-1 flex-col">
       {activeView === 'drive' && !isSearching && (
-        <div className="flex items-center gap-1 border-b border-slate-100 bg-white px-4 py-2 text-sm text-slate-500 sm:px-8">
+        <div className="flex items-center gap-1 border-b border-slate-100 bg-white px-4 py-2 text-sm text-slate-500 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400 sm:px-8">
           <button
             onClick={() => handleBreadcrumbClick(-1)}
             className={`hover:text-indigo-600 ${folderPath.length === 0 ? 'font-medium text-slate-900' : ''}`}
@@ -419,11 +419,11 @@ export default function HomePage() {
           ))}
         </div>
       )}
-      <div className="flex flex-col gap-3 border-b border-slate-200 bg-white px-4 py-3 sm:flex-row sm:items-center sm:gap-4 sm:px-8 sm:py-4">
+      <div className="flex flex-col gap-3 border-b border-slate-200 bg-white px-4 py-3 dark:border-slate-800 dark:bg-slate-900 sm:flex-row sm:items-center sm:gap-4 sm:px-8 sm:py-4">
           <div className="flex flex-wrap items-center gap-2 sm:gap-3">
             <button
               onClick={() => setSidebarOpen(true)}
-              className="rounded-lg border border-slate-300 bg-white p-2 text-slate-700 shadow-sm sm:hidden"
+              className="rounded-lg border border-slate-300 bg-white p-2 text-slate-700 shadow-sm dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 sm:hidden"
             >
               ☰
             </button>
@@ -436,7 +436,7 @@ export default function HomePage() {
             <button
               onClick={() => fileInputRef.current?.click()}
               disabled={uploading}
-              className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50 disabled:opacity-50 sm:px-4 sm:text-sm"
+              className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 sm:px-4 sm:text-sm"
             >
               {uploading ? 'Uploading...' : 'Upload'}
             </button>
@@ -454,20 +454,20 @@ export default function HomePage() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search files and folders..."
-            className="w-full min-w-0 rounded-lg border border-slate-300 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:max-w-xs sm:flex-1"
+            className="w-full min-w-0 rounded-lg border border-slate-300 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:placeholder-slate-500 sm:max-w-xs sm:flex-1"
           />
 
-          <p className="text-xs font-medium text-slate-500 sm:ml-auto sm:shrink-0 sm:text-sm">{user.email}</p>
+          <p className="text-xs font-medium text-slate-500 dark:text-slate-400 sm:ml-auto sm:shrink-0 sm:text-sm">{user.email}</p>
         </div>
-        <div className="flex-1 overflow-auto bg-slate-50/30 p-8">
+        <div className="flex-1 overflow-auto bg-slate-50/30 dark:bg-slate-950 p-8">
           {isSearching && searching ? (
-            <p className="text-slate-400">Searching...</p>
+            <p className="text-slate-400 dark:text-slate-500">Searching...</p>
           ) : isSearching && displayFolders.length === 0 && displayFiles.length === 0 ? (
-            <p className="text-slate-400">No results for &quot;{searchQuery}&quot;</p>
+            <p className="text-slate-400 dark:text-slate-500">No results for &quot;{searchQuery}&quot;</p>
           ) : loadingItems ? (
-            <p className="text-slate-400">Loading...</p>
+            <p className="text-slate-400 dark:text-slate-500">Loading...</p>
           ) : displayFolders.length === 0 && displayFiles.length === 0 ? (
-            <div className="flex h-full flex-col items-center justify-center text-slate-400">
+            <div className="flex h-full flex-col items-center justify-center text-slate-400 dark:text-slate-500">
               <p className="text-sm">
                 {isTrashView
                   ? 'Trash is empty'
@@ -485,7 +485,9 @@ export default function HomePage() {
                   key={folder.id}
                   onClick={() => !isTrashView && !isSharedView && !isStarredView && handleFolderClick(folder)}
                   className={`group relative flex cursor-pointer flex-col items-center gap-2 rounded-xl border p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md ${
-                    selectedIds.has(folder.id) ? 'border-indigo-400 bg-indigo-50' : 'border-slate-200 bg-white'
+                    selectedIds.has(folder.id)
+                      ? 'border-indigo-400 bg-indigo-50 dark:border-indigo-500 dark:bg-indigo-500/10'
+                      : 'border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900'
                   }`}
                 >
                   {activeView === 'drive' && !isSearching && (
@@ -494,7 +496,7 @@ export default function HomePage() {
                       checked={selectedIds.has(folder.id)}
                       onClick={(e) => toggleSelect(e, folder.id)}
                       onChange={() => {}}
-                      className={`absolute left-2 top-2 h-4 w-4 accent-indigo-600 ${
+                      className={`absolute left-2 top-2 h-4 w-4 accent-indigo-600 dark:bg-slate-800 dark:border-slate-600 ${
                         selectedIds.has(folder.id) ? 'block' : 'hidden group-hover:block'
                       }`}
                     />
@@ -504,13 +506,13 @@ export default function HomePage() {
                       <>
                         <button
                           onClick={(e) => handleRestore(e, 'folder', folder.id)}
-                          className="flex rounded-md bg-white px-2 py-1 text-xs font-medium text-green-600 shadow-sm hover:bg-green-50 sm:hidden sm:group-hover:flex"
+                          className="flex rounded-md bg-white px-2 py-1 text-xs font-medium text-green-600 shadow-sm hover:bg-green-50 dark:bg-slate-800 dark:hover:bg-slate-700 sm:hidden sm:group-hover:flex"
                         >
                           Restore
                         </button>
                         <button
                           onClick={(e) => handlePermanentDelete(e, 'folder', folder.id)}
-                          className="flex rounded-md bg-white px-2 py-1 text-xs font-medium text-red-600 shadow-sm hover:bg-red-50 sm:hidden sm:group-hover:flex"
+                          className="flex rounded-md bg-white px-2 py-1 text-xs font-medium text-red-600 shadow-sm hover:bg-red-50 dark:bg-slate-800 dark:hover:bg-slate-700 sm:hidden sm:group-hover:flex"
                         >
                           Delete Forever
                         </button>
@@ -520,24 +522,24 @@ export default function HomePage() {
                                                   <button
                             onClick={(e) => handleToggleStar(e, folder, 'folder')}
                             className={`text-xl leading-none ${
-                              starredIds.has(folder.id) ? 'text-amber-500' : 'block text-slate-300 sm:hidden sm:group-hover:block'
+                              starredIds.has(folder.id) ? 'text-amber-500' : 'block text-slate-300 dark:text-slate-600 sm:hidden sm:group-hover:block'
                             }`}
                           >
                             ★
                           </button>
                         <button
                           onClick={(e) => handleDeleteFolder(e, folder.id)}
-                          className="flex rounded-md bg-white px-2 py-1 text-xs font-medium text-red-600 shadow-sm hover:bg-red-50 sm:hidden sm:group-hover:flex"
+                          className="flex rounded-md bg-white px-2 py-1 text-xs font-medium text-red-600 shadow-sm hover:bg-red-50 dark:bg-slate-800 dark:hover:bg-slate-700 sm:hidden sm:group-hover:flex"
                         >
                           X
                         </button>
                       </>
                     )}
                   </div>
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-100 text-amber-600 font-bold">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-100 text-amber-600 font-bold dark:bg-amber-500/20 dark:text-amber-400">
                     F
                   </div>
-                  <span className="w-full truncate text-center text-sm font-medium text-slate-700">
+                  <span className="w-full truncate text-center text-sm font-medium text-slate-700 dark:text-slate-300">
                     {folder.name}
                   </span>
                 </div>
@@ -547,7 +549,9 @@ export default function HomePage() {
                   key={file.id}
                   onClick={() => !isTrashView && handleFileClick(file)}
                   className={`group relative flex cursor-pointer flex-col items-center gap-2 rounded-xl border p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md ${
-                    selectedIds.has(file.id) ? 'border-indigo-400 bg-indigo-50' : 'border-slate-200 bg-white'
+                    selectedIds.has(file.id)
+                      ? 'border-indigo-400 bg-indigo-50 dark:border-indigo-500 dark:bg-indigo-500/10'
+                      : 'border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900'
                   }`}
                 >
                   {activeView === 'drive' && !isSearching && (
@@ -556,7 +560,7 @@ export default function HomePage() {
                       checked={selectedIds.has(file.id)}
                       onClick={(e) => toggleSelect(e, file.id)}
                       onChange={() => {}}
-                      className={`absolute left-2 top-2 h-4 w-4 accent-indigo-600 ${
+                      className={`absolute left-2 top-2 h-4 w-4 accent-indigo-600 dark:bg-slate-800 dark:border-slate-600 ${
                         selectedIds.has(file.id) ? 'block' : 'hidden group-hover:block'
                       }`}
                     />
@@ -566,13 +570,13 @@ export default function HomePage() {
                       <>
                         <button
                           onClick={(e) => handleRestore(e, 'file', file.id)}
-                          className="flex rounded-md bg-white px-2 py-1 text-xs font-medium text-green-600 shadow-sm hover:bg-green-50 sm:hidden sm:group-hover:flex"
+                          className="flex rounded-md bg-white px-2 py-1 text-xs font-medium text-green-600 shadow-sm hover:bg-green-50 dark:bg-slate-800 dark:hover:bg-slate-700 sm:hidden sm:group-hover:flex"
                         >
                           Restore
                         </button>
                         <button
                           onClick={(e) => handlePermanentDelete(e, 'file', file.id)}
-                          className="flex rounded-md bg-white px-2 py-1 text-xs font-medium text-red-600 shadow-sm hover:bg-red-50 sm:hidden sm:group-hover:flex"
+                          className="flex rounded-md bg-white px-2 py-1 text-xs font-medium text-red-600 shadow-sm hover:bg-red-50 dark:bg-slate-800 dark:hover:bg-slate-700 sm:hidden sm:group-hover:flex"
                         >
                           Delete Forever
                         </button>
@@ -582,20 +586,20 @@ export default function HomePage() {
                                                   <button
                             onClick={(e) => handleToggleStar(e, file, 'file')}
                             className={`text-xl leading-none ${
-                              starredIds.has(file.id) ? 'text-amber-500' : 'block text-slate-300 sm:hidden sm:group-hover:block'
+                              starredIds.has(file.id) ? 'text-amber-500' : 'block text-slate-300 dark:text-slate-600 sm:hidden sm:group-hover:block'
                             }`}
                           >
                             ★
                           </button>
                         <button
                           onClick={(e) => handleShareClick(e, file)}
-                          className="flex rounded-md bg-white px-2 py-1 text-xs font-medium text-indigo-600 shadow-sm hover:bg-indigo-50 sm:hidden sm:group-hover:flex"
+                          className="flex rounded-md bg-white px-2 py-1 text-xs font-medium text-indigo-600 shadow-sm hover:bg-indigo-50 dark:bg-slate-800 dark:hover:bg-slate-700 sm:hidden sm:group-hover:flex"
                         >
                           Share
                         </button>
                         <button
                           onClick={(e) => handleDeleteFile(e, file.id)}
-                          className="flex rounded-md bg-white px-2 py-1 text-xs font-medium text-red-600 shadow-sm hover:bg-red-50 sm:hidden sm:group-hover:flex"
+                          className="flex rounded-md bg-white px-2 py-1 text-xs font-medium text-red-600 shadow-sm hover:bg-red-50 dark:bg-slate-800 dark:hover:bg-slate-700 sm:hidden sm:group-hover:flex"
                         >
                           X
                         </button>
@@ -609,11 +613,11 @@ export default function HomePage() {
                   >
                     {getFileIcon(file.mime_type).label}
                   </div>
-                  <span className="w-full truncate text-center text-sm font-medium text-slate-700">
+                  <span className="w-full truncate text-center text-sm font-medium text-slate-700 dark:text-slate-300">
                     {file.name}
                   </span>
                   {isSearching && (
-                    <span className="text-xs text-slate-400">
+                    <span className="text-xs text-slate-400 dark:text-slate-500">
                       {file.folder_name && file.folder_id ? (
                         <button
                           onClick={(e) => {
@@ -630,7 +634,7 @@ export default function HomePage() {
                     </span>
                   )}
                   {isRecentView && (
-                    <span className="text-xs text-slate-400">
+                    <span className="text-xs text-slate-400 dark:text-slate-500">
                       {file.last_accessed_at
                         ? `Opened ${new Date(file.last_accessed_at).toLocaleDateString()}`
                         : `Uploaded ${new Date(file.created_at!).toLocaleDateString()}`}
@@ -660,8 +664,8 @@ export default function HomePage() {
         />
       )}
       {selectedIds.size > 0 && (
-        <div className="fixed bottom-6 left-1/2 z-50 flex -translate-x-1/2 items-center gap-3 rounded-full border border-slate-200 bg-white px-5 py-3 shadow-xl">
-          <span className="text-sm font-medium text-slate-700">
+        <div className="fixed bottom-6 left-1/2 z-50 flex -translate-x-1/2 items-center gap-3 rounded-full border border-slate-200 bg-white px-5 py-3 shadow-xl dark:border-slate-700 dark:bg-slate-800">
+          <span className="text-sm font-medium text-slate-700 dark:text-slate-200">
             {selectedIds.size} selected
           </span>
           <button
