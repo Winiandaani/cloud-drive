@@ -9,6 +9,9 @@ export const metadata: Metadata = {
     description: 'Store, share, and access your files anywhere.',
     type: 'website',
   },
+  verification: {
+    google: 'mRHh2nHztOt4HtHaIEqEzH2kp8EBvE3eoy3sCCaaOlY',
+  },
 };
 
 export const viewport: Viewport = {
