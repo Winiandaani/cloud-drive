@@ -84,33 +84,33 @@ export default function ShareDialog({ resourceType, resourceId, resourceName, on
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
-      <div className="w-full max-w-sm rounded-lg bg-white p-6 shadow-lg">
+      <div className="w-full max-w-sm rounded-lg bg-white p-6 shadow-lg dark:bg-slate-900">
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-semibold">Share &quot;{resourceName}&quot;</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">✕</button>
+          <h2 className="text-lg font-semibold dark:text-white">Share &quot;{resourceName}&quot;</h2>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 dark:hover:text-slate-300">✕</button>
         </div>
 
         <form onSubmit={handleShare} className="space-y-3">
           {error && <p className="rounded bg-red-50 p-2 text-sm text-red-600">{error}</p>}
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">Email</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-slate-300">Email</label>
             <input
               type="email"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="mt-1 w-full rounded border border-gray-300 p-2"
+              className="mt-1 w-full rounded border border-gray-300 p-2 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
               placeholder="someone@example.com"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">Role</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-slate-300">Role</label>
             <select
               value={role}
               onChange={(e) => setRole(e.target.value)}
-              className="mt-1 w-full rounded border border-gray-300 p-2"
+              className="mt-1 w-full rounded border border-gray-300 p-2 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
             >
               <option value="viewer">Viewer</option>
               <option value="editor">Editor</option>
@@ -126,8 +126,8 @@ export default function ShareDialog({ resourceType, resourceId, resourceName, on
           </button>
         </form>
 
-        <div className="mt-5 border-t border-gray-200 pt-4">
-          <h3 className="mb-2 text-sm font-medium text-gray-700">People with access</h3>
+        <div className="mt-5 border-t border-gray-200 pt-4 dark:border-slate-700">
+          <h3 className="mb-2 text-sm font-medium text-gray-700 dark:text-slate-300">People with access</h3>
 
           {loadingShares ? (
             <p className="text-sm text-gray-400">Loading...</p>
@@ -138,7 +138,7 @@ export default function ShareDialog({ resourceType, resourceId, resourceName, on
               {shares.map((share) => (
                 <li key={share.id} className="flex items-center justify-between text-sm">
                   <div>
-                    <p className="text-gray-800">{share.users?.email ?? 'Unknown user'}</p>
+                    <p className="text-gray-800 dark:text-slate-200">{share.users?.email ?? 'Unknown user'}</p>
                     <p className="text-xs text-gray-400 capitalize">{share.role}</p>
                   </div>
                   <button
@@ -153,11 +153,11 @@ export default function ShareDialog({ resourceType, resourceId, resourceName, on
           )}
         </div>
 
-        <div className="mt-4 border-t border-gray-200 pt-4">
+        <div className="mt-4 border-t border-gray-200 pt-4 dark:border-slate-700">
           <button
             onClick={handleGetLink}
             disabled={creatingLink}
-            className="w-full rounded border border-gray-300 p-2 text-sm hover:bg-gray-50 disabled:opacity-50"
+            className="w-full rounded border border-gray-300 p-2 text-sm hover:bg-gray-50 disabled:opacity-50 dark:border-slate-700 dark:hover:bg-slate-800"
           >
             {creatingLink ? 'Creating link...' : 'Get shareable link'}
           </button>

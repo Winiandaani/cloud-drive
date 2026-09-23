@@ -39,10 +39,10 @@ export default function BulkShareDialog({ items, onClose }: BulkShareDialogProps
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
-      <div className="w-full max-w-sm rounded-lg bg-white p-6 shadow-lg">
+      <div className="w-full max-w-sm rounded-lg bg-white p-6 shadow-lg dark:bg-slate-900">
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-semibold">Share {items.length} item{items.length > 1 ? 's' : ''}</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">✕</button>
+          <h2 className="text-lg font-semibold dark:text-white">Share {items.length} item{items.length > 1 ? 's' : ''}</h2>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 dark:hover:text-slate-300">✕</button>
         </div>
 
         <form onSubmit={handleShare} className="space-y-3">
@@ -54,23 +54,23 @@ export default function BulkShareDialog({ items, onClose }: BulkShareDialogProps
           )}
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">Email</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-slate-300">Email</label>
             <input
               type="email"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="mt-1 w-full rounded border border-gray-300 p-2"
+              className="mt-1 w-full rounded border border-gray-300 p-2 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
               placeholder="someone@example.com"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">Role</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-slate-300">Role</label>
             <select
               value={role}
               onChange={(e) => setRole(e.target.value)}
-              className="mt-1 w-full rounded border border-gray-300 p-2"
+              className="mt-1 w-full rounded border border-gray-300 p-2 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
             >
               <option value="viewer">Viewer</option>
               <option value="editor">Editor</option>
