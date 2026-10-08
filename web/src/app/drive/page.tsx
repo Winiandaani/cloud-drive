@@ -31,6 +31,7 @@ export default function HomePage() {
   const [files, setFiles] = useState<FileItem[]>([]);
   const [loadingItems, setLoadingItems] = useState(true);
   const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState({ done: 0, total: 0 });
   const [sharingFile, setSharingFile] = useState<FileItem | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -224,20 +225,36 @@ export default function HomePage() {
   }
 
   async function handleFileSelected(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const selected = Array.from(e.target.files ?? []);
+    if (selected.length === 0) return;
 
     setUploading(true);
-    try {
-      const folderId = currentFolderId === 'root' ? null : currentFolderId;
-      const data = await apiUploadFile(file, folderId);
-      setFiles((prev) => [...prev, data.file]);
-    } catch (err) {
-      console.error('Upload failed:', err);
-      alert('Upload failed.');
-    } finally {
-      setUploading(false);
-      if (fileInputRef.current) fileInputRef.current.value = '';
+    setUploadProgress({ done: 0, total: selected.length });
+    const folderId = currentFolderId === 'root' ? null : currentFolderId;
+    let failed = 0;
+    let nextIndex = 0;
+
+    async function worker() {
+      while (nextIndex < selected.length) {
+        const file = selected[nextIndex++];
+        try {
+          const data = await apiUploadFile(file, folderId);
+          setFiles((prev) => [...prev, data.file]);
+        } catch (err) {
+          console.error(`Upload failed for ${file.name}:`, err);
+          failed++;
+        }
+        setUploadProgress((prev) => ({ ...prev, done: prev.done + 1 }));
+      }
+    }
+
+    await Promise.all([worker(), worker(), worker()]);
+
+    setUploading(false);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+
+    if (failed > 0) {
+      alert(`${failed} of ${selected.length} file(s) failed to upload.`);
     }
   }
 
@@ -438,11 +455,12 @@ export default function HomePage() {
               disabled={uploading}
               className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 sm:px-4 sm:text-sm"
             >
-              {uploading ? 'Uploading...' : 'Upload'}
+              {uploading ? `Uploading ${uploadProgress.done} of ${uploadProgress.total}...` : 'Upload'}
             </button>
             <input
               ref={fileInputRef}
               type="file"
+              multiple
               onChange={handleFileSelected}
               className="hidden"
             />
