@@ -95,3 +95,8 @@ export async function apiGetSharedWithMe() {
 export async function apiGetRecent() {
   return apiGet('/api/recent');
 }
+export async function apiGetThumbnails(ids: string[]): Promise<Record<string, string>> {
+  if (ids.length === 0) return {};
+  const data = await apiPost('/api/files/thumbnails', { ids });
+  return data.urls || {};
+}

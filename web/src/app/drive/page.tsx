@@ -5,7 +5,7 @@ import { useSession } from '@/hooks/useSession';
 import Sidebar from '@/components/Sidebar';
 import ShareDialog from '@/components/ShareDialog';
 import BulkShareDialog from '@/components/BulkShareDialog';
-import { apiGet, apiPost, apiUploadFile, apiDelete, apiSearch, apiToggleStar, apiGetStarred, apiGetTrash, apiRestoreItem, apiPermanentDelete, apiGetSharedWithMe, apiGetRecent } from '@/lib/api';
+import { apiGet, apiPost, apiUploadFile, apiDelete, apiSearch, apiToggleStar, apiGetStarred, apiGetTrash, apiRestoreItem, apiPermanentDelete, apiGetSharedWithMe, apiGetRecent, apiGetThumbnails } from '@/lib/api';
 import { getFileIcon } from '@/lib/fileIcons';
 
 interface Folder {
@@ -32,6 +32,7 @@ export default function HomePage() {
   const [loadingItems, setLoadingItems] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState({ done: 0, total: 0 });
+  const [thumbs, setThumbs] = useState<Record<string, string>>({});
   const [sharingFile, setSharingFile] = useState<FileItem | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -124,6 +125,27 @@ export default function HomePage() {
 
     return () => clearTimeout(timeout);
   }, [searchQuery]);
+    useEffect(() => {
+    const all = [
+      ...files,
+      ...(searchResults?.files ?? []),
+      ...recentFiles,
+      ...starredFiles,
+      ...sharedFiles,
+    ];
+    const missing = Array.from(
+      new Set(
+        all
+          .filter((f) => f.mime_type?.startsWith('image/') && !thumbs[f.id])
+          .map((f) => f.id)
+      )
+    );
+    if (missing.length === 0) return;
+
+    apiGetThumbnails(missing)
+      .then((urls) => setThumbs((prev) => ({ ...prev, ...urls })))
+      .catch((err) => console.error('Failed to load thumbnails:', err));
+  }, [files, searchResults, recentFiles, starredFiles, sharedFiles]);
 
   async function handleNewFolder() {
     const name = prompt('Folder name:');
@@ -624,13 +646,22 @@ export default function HomePage() {
                       </>
                     )}
                   </div>
-                  <div
-                    className={`flex h-10 w-10 items-center justify-center rounded-lg text-xs font-bold ${
-                      getFileIcon(file.mime_type).bg
-                    } ${getFileIcon(file.mime_type).text}`}
-                  >
-                    {getFileIcon(file.mime_type).label}
-                  </div>
+                                    {thumbs[file.id] ? (
+                    <img
+                      src={thumbs[file.id]}
+                      alt={file.name}
+                      loading="lazy"
+                      className="h-24 w-full rounded-lg object-cover"
+                    />
+                  ) : (
+                    <div
+                      className={`flex h-10 w-10 items-center justify-center rounded-lg text-xs font-bold ${
+                        getFileIcon(file.mime_type).bg
+                      } ${getFileIcon(file.mime_type).text}`}
+                    >
+                      {getFileIcon(file.mime_type).label}
+                    </div>
+                  )}
                   <span className="w-full truncate text-center text-sm font-medium text-slate-700 dark:text-slate-300">
                     {file.name}
                   </span>
