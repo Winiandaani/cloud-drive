@@ -116,5 +116,51 @@ router.delete('/:id', requireAuth, async (req: AuthedRequest, res) => {
 
   res.status(204).send();
 });
+// POST /api/files/thumbnails — temporary image links for a list of file ids
+router.post('/thumbnails', requireAuth, async (req: AuthedRequest, res) => {
+  const ids: string[] = Array.isArray(req.body.ids) ? req.body.ids : [];
+  if (ids.length === 0) return res.json({ urls: {} });
+
+  const { data: rows, error } = await supabaseAdmin
+    .from('files')
+    .select('id, storage_key, mime_type, owner_id')
+    .in('id', ids)
+    .eq('is_deleted', false);
+
+  if (error) {
+    return res.status(500).json({ error: { code: 'DB_ERROR', message: error.message } });
+  }
+
+  const { data: shareRows } = await supabaseAdmin
+    .from('shares')
+    .select('resource_id')
+    .eq('resource_type', 'file')
+    .eq('grantee_user_id', req.userId)
+    .in('resource_id', ids);
+
+  const sharedIds = new Set((shareRows || []).map((s) => s.resource_id));
+
+  const allowed = (rows || []).filter(
+    (r) => r.mime_type?.startsWith('image/') && (r.owner_id === req.userId || sharedIds.has(r.id))
+  );
+
+  if (allowed.length === 0) return res.json({ urls: {} });
+
+  const { data: signed, error: signError } = await supabaseAdmin.storage
+    .from('drive')
+    .createSignedUrls(allowed.map((r) => r.storage_key), 3600);
+
+  if (signError) {
+    return res.status(500).json({ error: { code: 'STORAGE_ERROR', message: signError.message } });
+  }
+
+  const urls: Record<string, string> = {};
+  for (const r of allowed) {
+    const match = (signed || []).find((s) => s.path === r.storage_key);
+    if (match?.signedUrl) urls[r.id] = match.signedUrl;
+  }
+
+  res.json({ urls });
+});
 
 export default router;
